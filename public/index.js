@@ -1,48 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Expense Tracker</title>
-    <link rel="stylesheet" href="style.css"/>
-  </head>
-  <body>
-    <div class="page-wrap">
-      <div class="main-wrap">
-        <div class="main-container">
-          <div class="container">
-            <div class="heading">
-              <h2>Expense Tracker</h2>
-            </div>
 
-            <form id="expenseForm">
-              <label for="description">Description</label>
-              <input
-                type="text"
-                id="description"
-                name="description"
-                required
-              /><br />
-              <label for="amount">Amount</label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                min="0"
-                required
-              /><br />
-              <button type="submit">Add Expense</button>
-            </form>
-          </div>
-          <div class="expense">
-            <h2>Expenses</h2>
-            <div class="explist">
-              <ul id="expenseList"></ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- <script>
       const form = document.getElementById("expenseForm");
       const expenseList = document.getElementById("expenseList");
       let editingExpensesId = null;
@@ -119,7 +75,4 @@
       }
 
       getExpenses();
-    </script> -->
-    <script src="index.js"></script>
-  </body>
-</html>
+  
