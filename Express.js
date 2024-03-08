@@ -32,8 +32,15 @@ app.post('/api/expenses', async(req, res) => {
 
 app.put('/api/expenses/:id',async (req,res)=>{
   const { id } = req.params;
-  const updatedExpense = await Expense.findByIdAndUpdate(id , req.body,)
-})
+  const updatedExpense = await Expense.findByIdAndUpdate(id , req.body,{new: true});
+  res.json(updatedExpense);
+});
+
+app.delete('/api/expenses/:id',async (req,res)=>{
+  const { id } = req.params;
+  await Expense.findByIdAndDelete(id);
+  res.sendStatus(204);
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
