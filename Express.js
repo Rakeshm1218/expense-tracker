@@ -7,7 +7,7 @@ const port = 3000;
 mongoose.connect('mongodb://localhost:27017/Expense-Tracker');
 
 const expenseScheme = new mongoose.Schema({
-  descriotion:String,
+  description:String,
   amount:Number
 });
 
@@ -17,7 +17,6 @@ const Expense = mongoose.model('Expense',expenseScheme);
 app.use(express.json());
 app.use(express.static('public'));
 
-let expenses = [];
 
 app.get('/api/expenses', async(req, res) => {
   const expenses = await Expense.find();

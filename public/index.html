@@ -7,15 +7,26 @@
         padding: 0;
         margin: 0;
         box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+          sans-serif;
       }
-      
+      .page-wrap {
+        background-color: #3b3b3b;
+        height: 100vh;
+      }
+      .main-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        height: 100vh;
+      }
       .main-container {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
-        background-color: #3b3b3b;
+        flex-wrap: wrap;
       }
       .container {
         display: flex;
@@ -24,11 +35,11 @@
         flex-direction: column;
         background-color: #f5f5f5;
         gap: 80px;
-        height: 350px;
-        width: 400px;
+        height: 450px;
+        width: 550px;
         border: 1px solid #3b3b3b;
-        border-bottom-left-radius: 40px;
-        border-top-left-radius: 40px;
+        /* border-bottom-left-radius: 40px;
+        border-top-left-radius: 40px; */
       }
       #expenseForm {
         display: flex;
@@ -36,48 +47,41 @@
         color: #3b3b3b;
         font-weight: bold;
       }
-      h2{
+      h2 {
         color: #e1c007;
       }
       .expense {
         display: flex;
-        padding: 30px;
         flex-direction: column;
         align-items: center;
-        height: 350px;
-        width: 400px;
+        justify-content: space-evenly;
+        height: 450px;
+        width: 550px;
         border: 1px solid #3b3b3b;
-        border-top-right-radius: 40px;
-        border-bottom-right-radius: 40px;
+        /* border-top-right-radius: 40px;
+        border-bottom-right-radius: 40px; */
         background-color: #f5f5f5;
       }
       ul {
-        list-style:upper-roman;
+        list-style: upper-roman;
         display: flex;
         flex-direction: column;
-        flex-wrap: wrap;
-        align-items: center;
+        align-items: start;
         justify-content: start;
         padding: 20px;
         /* border: 1px solid black; */
         font-size: 16px;
-        height: 250px;
-        width: 250px;
-        margin: 10px;
-        border-radius: 40px;
-        font-weight: bold;
-        border: none;
-        box-shadow: 1px 2px 2px #3b3b3b;
       }
-      li{
+      li {
         color: #3b3b3b;
+        margin: 10px;
       }
       #expenseForm input {
         outline: none;
         border: none;
         border-bottom: 2px solid #3b3b3b;
         height: 30px;
-        width: 200px;
+        width: 300px;
         background-color: #f5f5f5;
       }
       button {
@@ -89,52 +93,78 @@
         border-radius: 20px;
         font-size: 12px;
       }
-      button:hover{
+      button:hover {
         box-shadow: 1px 2px 6px #3b3b3b;
       }
     </style>
   </head>
   <body>
-      <div class="main-container">
-        <div class="container">
-          <h2>Expense Tracker</h2>
-          <form id="expenseForm">
-            <label for="description">Description</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              required
-            /><br />
-            <label for="amount">Amount</label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              min="0"
-              required
-            /><br />
-            <button type="submit">Add Expense</button>
-          </form>
-        </div>
-        <div class="expense">
-          <h2>Expenses</h2>
-          <div class="explist">
-            <ul id="expenseList"></ul>
+    <div class="page-wrap">
+      <div class="main-wrap">
+        <div class="main-container">
+          <div class="container">
+            <div class="heading">
+              <h2>Expense Tracker</h2>
+            </div>
+
+            <form id="expenseForm">
+              <label for="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                required
+              /><br />
+              <label for="amount">Amount</label>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                min="0"
+                required
+              /><br />
+              <button type="submit">Add Expense</button>
+            </form>
+          </div>
+          <div class="expense">
+            <h2>Expenses</h2>
+            <div class="explist">
+              <ul id="expenseList"></ul>
+            </div>
           </div>
         </div>
       </div>
-    
+    </div>
 
     <script>
       const form = document.getElementById("expenseForm");
       const expenseList = document.getElementById("expenseList");
+      let editingExpensesId = null;
+
+      async function getExpenses() {
+        const response = await fetch("/api/expenses");
+        if (response.ok) {
+          const expenses = await response.json();
+          renderExpenses(expenses);
+        }
+      }
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const description = document.getElementById("description").value;
         const amount = parseFloat(document.getElementById("amount").value);
 
+        if (editingExpensesId) {
+          await updateExpense(editingExpensesId, description, amount);
+          editingExpensesId = null;
+        } else {
+          await addExpense(description, amount);
+        }
+        getExpenses();
+        form.reset();
+      });
+
+      async function addExpense(description, amount) {
         const response = await fetch("/api/expenses", {
           method: "POST",
           headers: {
@@ -142,32 +172,44 @@
           },
           body: JSON.stringify({ description, amount }),
         });
-
-        if (response.ok) {
-          const newExpense = await response.json();
-          expenses.push(newExpense);
-          renderExpenses();
-          form.reset();
-        }
-      });
-
-      async function getExpenses() {
-        const response = await fetch("/api/expenses");
-        if (response.ok) {
-          expenses = await response.json();
-          renderExpenses();
+        if (!response.ok) {
+          console.error("Fail to add expense");
         }
       }
+      async function deleteExpense(id) {
+        await fetch(`/api/expenses/${id}`, { method: "DELETE" });
+        getExpenses();
+      }
 
-      function renderExpenses() {
+      async function updateExpense(id, description, amount) {
+        await fetch(`/api/expenses/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ description, amount }),
+        });
+      }
+
+      function renderExpenses(expenses) {
         expenseList.innerHTML = "";
         expenses.forEach((expense) => {
           const li = document.createElement("li");
-          li.textContent = `${expense.description}: $${expense.amount.toFixed(
-            2
-          )}`;
+          li.id = expense._id;
+          li.innerHTML = `
+              ${expense.description}: $${expense.amount.toFixed(2)}
+              <button onclick="deleteExpense('${expense._id}')">Delete</button>
+              <button onclick="editExpense('${expense._id}', '${
+            expense.description
+          }', ${expense.amount})">Edit</button>
+            `;
           expenseList.appendChild(li);
         });
+      }
+      function editExpense(id, description, amount) {
+        document.getElementById("description").value = description;
+        document.getElementById("amount").value = amount;
+        editingExpensesId = id;
       }
 
       getExpenses();
